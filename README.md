@@ -77,18 +77,32 @@ git clone <repo-url> <你的 agent 工具 skills 目录>/umaai_review
 
 ## gamedata 与「旧版数据」
 
-gamedata 只按 umaai 目录解析：`<umaai_root>/gamedata`。
-**没有 umaai 目录时**，用本仓自带的 `gamedata/`——此时 bin 会在结论里标注
-「gamedata 为 skill 自带旧版」，因为卡名 / 赛程 / 地区名会随游戏版本过期。
+gamedata 按两级解析：
 
-要让自带数据保持新鲜，维护者更新时：
-
-```powershell
-Copy-Item <umaai>\gamedata .\gamedata -Recurse -Force
-"v<版本> / 打包于 $(Get-Date -Format yyyy-MM-dd)" | Set-Content .\gamedata\BUNDLED
+```
+<umaai_root>/gamedata          ← 装了 umaai 就用这份（最新）
+  ↓ 没有 umaai_root / 该目录不存在
+<skill>/data/gamedata/         ← skill 自带，随 Release 包发布
 ```
 
-`gamedata/` 默认**不随仓发布**（避免分发游戏数据）；需要时手动放入并在发布包里带上。
+用自带那份时，bin 会在结论里标注「gamedata 为 skill 自带旧版（版本）」——
+卡名 / 赛程 / 地区名会随游戏版本过期，症状与应对见下。
+
+**自带那份放在 `data/` 下**（bin 要求目录名必须是 `gamedata`，但位置任意），
+所以升级覆盖解压**不会动到你自己放的 `<skill>/gamedata/`**。
+想用更新的数据，把 umaai 的 `gamedata/` 拷到 skill 根下的 `gamedata/` 即可（优先级更高）。
+
+### 数据过期会怎样
+
+| 过期项 | 症状 |
+|---|---|
+| umaDB（马娘赛程） | 养新马娘时旧库没有她的赛程 → 赛程与评分不可用 |
+| races（必赛回合） | 必赛判定错 → 误报「目标赛未跑赢」 |
+| cardDB（卡名/类型） | 卡组显示 `unknown(<id>)` |
+| text_data_dict | 技能名、事件名显示旧称 |
+
+维护者刷数据：跑 `.\sync.ps1` 会自动从 umaai 目录拷到 `gamedata-bundled/`，
+并写入 `BUNDLED`（打包日期 + umaai-rs 提交号）。
 
 ## 维护者：本仓是生成物
 

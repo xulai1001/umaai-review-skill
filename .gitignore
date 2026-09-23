@@ -1,8 +1,9 @@
+# 用户自己放的 umaai 数据不入库（避免分发游戏数据）
+# 注意：必须根锚定 —— 写成 `gamedata/` 会连 data/gamedata/（随包发布的自带数据）一起忽略
+/gamedata/
+
+# 复盘产物（只匹配 game<数字>/，别写成 game*/ —— 那会误伤别的目录）
+game[0-9]*/
+
 # 机器相关，不进版本控制
 local_paths.json
-
-# gamedata 默认不随仓发布（避免分发游戏数据）；需要随包时手动放入并在发布包里带上
-gamedata/
-
-# 复盘产物
-game*/

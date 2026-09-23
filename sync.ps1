@@ -63,6 +63,31 @@ foreach ($m in $map) {
     }
 }
 
+# —— 刷自带 gamedata（入库；供 Release 打包与没装 umaai 的用户）——
+# 放 data/gamedata/：bin 要求**目录名必须是 gamedata**（umasim 硬编码相对路径），
+# 但位置任意；用 data/ 这层把它与用户自己放的 <skill>/gamedata/ 分开，升级不会互相覆盖。
+$gdSrc = Join-Path $UmaaiRoot 'gamedata'
+$gdBundled = Join-Path $dst 'data\gamedata'
+if (Test-Path (Join-Path $gdSrc 'umaDB.json')) {
+    if ($Check) {
+        Get-ChildItem $gdSrc -File | ForEach-Object {
+            $t = Join-Path $gdBundled $_.Name
+            if (-not (Test-Path $t)) { Write-Host "自带 gamedata 缺失: $($_.Name)"; $bad++ }
+            elseif ((Get-Sha $_.FullName) -ne (Get-Sha $t)) { Write-Host "自带 gamedata 过期: $($_.Name)"; $bad++ }
+        }
+    } else {
+        Remove-Item $gdBundled -Recurse -Force -ErrorAction SilentlyContinue
+        Copy-Item $gdSrc $gdBundled -Recurse -Force
+        $rev = (& git -C $UmaaiRoot rev-parse --short HEAD 2>$null | Select-Object -First 1)
+        $stamp = "打包于 $(Get-Date -Format 'yyyy-MM-dd')"
+        if ($rev) { $stamp += " · umaai-rs @ $rev" }
+        [System.IO.File]::WriteAllText((Join-Path $gdBundled 'BUNDLED'), "$stamp`n")
+        Write-Host "刷新自带 gamedata（$stamp）"
+    }
+} else {
+    Write-Host "源仓没有 gamedata/，跳过自带数据刷新" -ForegroundColor Yellow
+}
+
 if ($Check) {
     if ($bad -eq 0) { Write-Host "`n一致性校验通过：本仓与 umaai-rs 同源" -ForegroundColor Green }
     else { Write-Host "`n$bad 项不一致/缺失——请先跑 .\sync.ps1" -ForegroundColor Yellow; exit 1 }

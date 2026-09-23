@@ -28,8 +28,8 @@ jobs:
       - name: 校验必备文件
         run: |
           set -e
-          for f in SKILL.md bin/umaai_review.exe templates/report.html.j2 templates/brief.md.j2 reference/metrics_glossary.md reference/uma_specific.md; do
-            [ -e "$f" ] || { echo "缺少 $f"; exit 1; }
+          for f in SKILL.md bin/umaai_review.exe templates/report.html.j2 templates/brief.md.j2 reference/metrics_glossary.md reference/uma_specific.md data/gamedata/umaDB.json data/gamedata/BUNDLED; do
+            [ -e "$f" ] || { echo "缺少 $f（自带 gamedata 需先跑 sync.ps1）"; exit 1; }
           done
           echo "必备文件齐全"
 
@@ -37,7 +37,7 @@ jobs:
         run: |
           set -e
           mkdir -p dist/umaai_review
-          cp -r SKILL.md reference templates bin README.md install.ps1 local_paths.example.json dist/umaai_review/
+          cp -r SKILL.md reference templates bin data README.md install.ps1 local_paths.example.json dist/umaai_review/
           cd dist && zip -qr ../umaai_review.zip umaai_review
           echo "--- 包内容 ---"
           unzip -l ../umaai_review.zip
