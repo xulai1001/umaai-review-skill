@@ -1,0 +1,8 @@
+# 机器相关，不进版本控制
+local_paths.json
+
+# gamedata 默认不随仓发布（避免分发游戏数据）；需要随包时手动放入并在发布包里带上
+gamedata/
+
+# 复盘产物
+game*/
