@@ -75,3 +75,16 @@
     - `timeline.race_count` 是**跨回合快照**，t27/s0 已变 2 反映的是 t26 赛果，数字本身证明不了 t26 的胜负。
     - **bin 侧其实已经算好了**：`schedule::build` 有 `not_won = mandatory_turns − race_history`，非空会写进 `schedule.notes`「未跑赢的必赛回合: [...]」。本局该注记**不存在**，这本身就是「必赛全胜」的正面证据 —— **读 §5.4 的 notes 有无这一行，比任何手算都可靠**。另注：`schedule.notes` 需带 `--narrative` 重跑时才刷新，别把生成顺序问题误读成数据缺口。
     - 「三冠」也不是可以直接说的词：umaDB / gamedata 里**没有赛次与赛名的对照表**（`text_data_dict` 只有赛名表，无 turn→赛名映射），所以「t26 是XX赛」这类断言无从取证，叙事里不要写具体赛名与「三冠」等赛制归类。
+
+## 背景图 yayoi.png：必须先拷到位，再调 umaai_review（顺序坑）
+
+27. **结论先行：`yayoi.png` 要在调用 `umaai_review.exe` 之前放进 bin 的输出目录**，跑完再拷就晚了——那次渲染不带背景。
+    - **为什么**：模板按「输出目录里有没有 `yayoi.png`」一次性决定 `has_bg`（[report.html.j2](../templates/report.html.j2) 里是相对路径 `url("yayoi.png")`），bin 只在**渲染那一刻**检测一次，之后不会自动补。想补只能重跑 bin（带 `--narrative` 重跑即可，叙述不丢，见第 11 条）。
+    - **正确位置 = bin 的 `--out` 目录**，即工作流程第 2 步的 `<cwd>/game{id}/`（与 report.html 同级）。**不是** skill 的 `reference/` 目录，也**不是** `<umaai_root>/logs/`——相对路径只认与 report.html 同级的文件。
+    - **正确顺序**：先建输出目录并拷图，再跑 bin：
+      ```powershell
+      New-Item -ItemType Directory -Force -Path <cwd>\game{id} | Out-Null
+      Copy-Item <skill>\reference\yayoi.png <cwd>\game{id}\ -Force
+      <skill>\bin\umaai_review.exe --zip <局包> --out <cwd>\game{id} --gamedata <gamedata 目录>
+      ```
+    - 缺图不影响流程：报告照常生成，只是没有背景与半透明卡片（可选装饰，不报错）；`reference/yayoi.png` 不会被 bin 清理（第 12 条）。

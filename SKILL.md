@@ -64,6 +64,9 @@ Python 不可用再考虑其他脚本（`node -e` / PowerShell / Bash）。两�
      没有 `local_paths.json` 时**询问用户一次**「umaai 目录在哪」，确认后写入
      `local_paths.json`（`{"umaai_root": "..."}`），下次先读它。**不使用环境变量**（面向初级用户）。
    - `--out` 显式指向当前工作区；bin 默认落在局包同级，拖入的局包会让产物散落到临时目录。
+   - **背景图先拷再跑**：想让报告带背景，必须**先建好 `--out` 目录并把 `reference/yayoi.png` 拷进去**，再跑 bin——
+     模板按「输出目录里有没有该图」一次性决定背景（相对路径 `url("yayoi.png")`，只认与 report.html 同级的文件），
+     跑完再拷就晚了（补图只能重跑 bin）。缺图不影响流程，只是没有背景与半透明卡片。详见 pitfalls 第 27 条。
    - `--narrative <md>`：第 6 步写好的叙述文件；**首次运行不必带**（此时 report.html 留占位），
      写完叙述后带它再跑一次即得到完整报告。
    - exe 不可用降级：`Expand-Archive` 解包，直接读 `decisions.csv` + `meta.json` 做决策链路 / 运气分 / 置信度分析（丢失依赖快照时序的检查项），结论需注明降级。**此路径下 brief.md 与 digest.json 都不可得**，第 3 步改走「解包数据 + 人工判读」，不适用下方的 brief / digest 分支。
@@ -150,9 +153,9 @@ Python 不可用再考虑其他脚本（`node -e` / PowerShell / Bash）。两�
      只对「吃到=是」的行做一两句点评，不必回 digest 取 `used`
    - **叙述口吻与对话一致**：persona 启用时按人设书写（summary 块尾可署「理事长 秋川弥生」），
      网页版与对话版只是同一复盘的两个出口
-   - **背景图（可选装饰）**：把 `reference/yayoi.png` 复制到输出目录 `logs/game{id}/` 即可——
+   - **背景图（可选装饰）**：把 `reference/yayoi.png` 复制到输出目录（bin 的 `--out` 目录，即 `<cwd>/game{id}/`）即可——
      **背景 CSS 由模板自动加**（bin 检测到该文件才启用背景与半透明卡片），不必改 HTML。
-     图片缺省时跳过，报告照常。**顺序要求**：图片要在跑 bin **之前**放好，否则那次渲染不带背景
+     图片缺省时跳过，报告照常。**顺序要求**：图片要在跑 bin **之前**放好，否则那次渲染不带背景（pitfalls 第 27 条）
 
 ## 归因框架
 

@@ -37,7 +37,7 @@ jobs:
         run: |
           set -e
           mkdir -p dist/umaai_review
-          cp -r SKILL.md reference templates bin data README.md install.ps1 local_paths.example.json dist/umaai_review/
+          cp -r SKILL.md reference templates bin data README.md SECURITY.md install.ps1 local_paths.example.json dist/umaai_review/
           cd dist && zip -qr ../umaai_review.zip umaai_review
           echo "--- 包内容 ---"
           unzip -l ../umaai_review.zip

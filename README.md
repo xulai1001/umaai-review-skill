@@ -115,7 +115,7 @@ gamedata 按两级解析：
 ```
 
 被同步的内容：`SKILL.md`、`reference/`、`templates/`、`bin/umaai_review.exe`。
-本仓独有的：`README.md`、`install.ps1`、`sync.ps1`、`.github/workflows/release.yml`。
+本仓独有的：`README.md`、`SECURITY.md`、`install.ps1`、`sync.ps1`、`.github/workflows/release.yml`。
 
 ### 发版
 
