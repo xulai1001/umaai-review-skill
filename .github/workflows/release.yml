@@ -1,0 +1,49 @@
+# 打 tag 即发版：把 skill 打成 umaai_review.zip 并创建 Release
+#
+# 本机无需 gh，也无需任何发版工具：
+#   git tag v1.0.0
+#   git push origin v1.0.0
+#
+# 产物：Release 附件 umaai_review.zip，内含顶层目录 umaai_review/
+# 稳定下载链接（永远指向最新版）：
+#   https://github.com/<owner>/<repo>/releases/latest/download/umaai_review.zip
+#
+# 发版前请在本地先跑 .\sync.ps1 -Check 确认与 umaai-rs 同源（CI 无法访问该源仓）
+
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 校验必备文件
+        run: |
+          set -e
+          for f in SKILL.md bin/umaai_review.exe templates/report.html.j2 templates/brief.md.j2 reference/metrics_glossary.md reference/uma_specific.md; do
+            [ -e "$f" ] || { echo "缺少 $f"; exit 1; }
+          done
+          echo "必备文件齐全"
+
+      - name: 组装 zip（顶层目录 = skill 目录名，解压即到位）
+        run: |
+          set -e
+          mkdir -p dist/umaai_review
+          cp -r SKILL.md reference templates bin README.md install.ps1 local_paths.example.json dist/umaai_review/
+          cd dist && zip -qr ../umaai_review.zip umaai_review
+          echo "--- 包内容 ---"
+          unzip -l ../umaai_review.zip
+
+      - name: 创建 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" umaai_review.zip --generate-notes

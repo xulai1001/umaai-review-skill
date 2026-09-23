@@ -7,24 +7,60 @@
 
 ## 安装
 
+> 下文 `<owner>/<repo>` 请替换为实际仓库地址。
+
+### 方式 A：下载 Release 包（推荐，agent 也能照做）
+
 ```powershell
-# ① 装到你的 agent 工具 skills 目录（路径按你的工具改）
+$url = 'https://github.com/<owner>/<repo>/releases/latest/download/umaai_review.zip'
+Invoke-WebRequest $url -OutFile umaai_review.zip
+Expand-Archive umaai_review.zip -DestinationPath <你的 agent 工具 skills 目录> -Force
+Remove-Item umaai_review.zip
+```
+
+包内顶层目录就是 skill 目录名，**解压即到位**，不用改名。
+
+**给 agent 的安装指令**（可机械照做）：
+
+1. 确定目标：`<skills 目录>/umaai_review`——`<skills 目录>` 优先用户指定，
+   否则用你所在工具的 skills 目录（如 `<工作区>/.trae/skills`、`~/.trae-cn/skills`、`~/.claude/skills`）
+2. 下载上面的 zip，解压到 `<skills 目录>`（得到 `<skills 目录>/umaai_review/`）
+3. 配置 umaai 目录：写 `<skills 目录>/umaai_review/local_paths.json`，
+   内容 `{"umaai_root": "<umaai 目录>"}`；不确定就跳过——首次复盘时会问用户
+4. 自检：`<skills 目录>/umaai_review/bin/umaai_review.exe --help` 应打印用法
+
+### 方式 B：克隆仓库（可 `git pull` 升级）
+
+```powershell
+git clone <repo-url> <你的 agent 工具 skills 目录>/umaai_review
+```
+
+目录名必须显式写成 `umaai_review`（仓库名与 skill 名不同）。
+
+### 方式 C：用仓内安装脚本
+
+```powershell
 .\install.ps1 -SkillsDir <你的 agent 工具 skills 目录> -UmaaiRoot <你的 umaai 目录>
 ```
 
 `-UmaaiRoot` 指向 umaai 仓库（含 `gamedata/` 与 `logs/`）。不指定也可以，
 首次复盘时 skill 会问你一次并记住。
 
-安装后目录长这样：
+### 安装后的目录
 
 ```
-<skills>\umaai_review\
+<skills>/umaai_review/
 ├── SKILL.md            技能入口
 ├── reference/          判据与口径（含 pitfalls、马娘专属判据）
-├── bin/umaai_review.exe
 ├── templates/          brief.md / report.html 模板
-└── local_paths.json    {"umaai_root": "..."}   ← install 生成
+├── bin/umaai_review.exe
+└── local_paths.json    {"umaai_root": "..."}   ← 可选
 ```
+
+### 升级
+
+- 方式 A：重新下载解压覆盖（`local_paths.json` 不在包里，会**保留**）
+- 方式 B：在 skill 目录里 `git pull`
 
 ## 怎么用
 
@@ -65,7 +101,20 @@ Copy-Item <umaai>\gamedata .\gamedata -Recurse -Force
 ```
 
 被同步的内容：`SKILL.md`、`reference/`、`templates/`、`bin/umaai_review.exe`。
-本仓独有的：`README.md`、`install.ps1`、`sync.ps1`。
+本仓独有的：`README.md`、`install.ps1`、`sync.ps1`、`.github/workflows/release.yml`。
+
+### 发版
+
+**本机不需要 `gh`** —— 打 tag 推上去，GitHub Actions 自动打包并创建 Release：
+
+```powershell
+.\sync.ps1 -Check          # 先确认与 umaai-rs 同源（CI 访问不到该源仓，只能本地校验）
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+产物：Release 附件 `umaai_review.zip`（内含顶层目录 `umaai_review/`）。
+稳定链接 `…/releases/latest/download/umaai_review.zip` 永远指向最新版。
 
 ## 素材来源
 
