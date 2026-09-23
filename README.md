@@ -9,7 +9,7 @@
 
 ```powershell
 # ① 装到你的 agent 工具 skills 目录（路径按你的工具改）
-.\install.ps1 -SkillsDir C:\Users\<你>\.trae-cn\skills -UmaaiRoot <你的 umaai 目录>
+.\install.ps1 -SkillsDir <你的 agent 工具 skills 目录> -UmaaiRoot <你的 umaai 目录>
 ```
 
 `-UmaaiRoot` 指向 umaai 仓库（含 `gamedata/` 与 `logs/`）。不指定也可以，
@@ -59,12 +59,17 @@ Copy-Item <umaai>\gamedata .\gamedata -Recurse -Force
 **`umaai-rs` 是唯一源**，本仓的文件由脚本单向生成，不要在这里直接改：
 
 ```powershell
-.\sync.ps1              # 从 umaai-rs 同步进来
-.\sync.ps1 -Check       # 只校验一致性（发版前 / CI）
+.\sync.ps1 -UmaaiRoot <umaai-rs 目录>   # 从 umaai-rs 同步进来
+.\sync.ps1                              # 省略 -UmaaiRoot 时读本仓 local_paths.json
+.\sync.ps1 -Check                       # 只校验一致性（发版前 / CI）
 ```
 
 被同步的内容：`SKILL.md`、`reference/`、`templates/`、`bin/umaai_review.exe`。
 本仓独有的：`README.md`、`install.ps1`、`sync.ps1`。
+
+## 素材来源
+
+- 报告背景图：pixiv id **148120780**
 
 ## 环境要求
 

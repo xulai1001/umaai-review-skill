@@ -1,9 +1,9 @@
 ﻿# 把本 skill 安装到 agent 工具的 skills 目录
 #
 # 用法：
-#   .\install.ps1 -SkillsDir C:\Users\me\.trae-cn\skills              # 只装 skill
-#   .\install.ps1 -SkillsDir C:\Users\me\.trae-cn\skills -UmaaiRoot D:\umaai-rs
-#                                                                    # 同时写入 umaai 目录配置
+#   .\install.ps1 -SkillsDir <agent 工具 skills 目录>              # 只装 skill
+#   .\install.ps1 -SkillsDir <agent 工具 skills 目录> -UmaaiRoot <umaai 目录>
+#                                                                  # 同时写入 umaai 目录配置
 param(
     [Parameter(Mandatory = $true)][string]$SkillsDir,
     [string]$UmaaiRoot = ''

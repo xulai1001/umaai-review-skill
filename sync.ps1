@@ -1,16 +1,29 @@
 ﻿# 单向同步：umaai-rs（唯一源）→ 本仓
 #
 # 用法：
-#   .\sync.ps1                        # 从默认 umaai-rs 同步进来
-#   .\sync.ps1 -UmaaiRoot D:\umaai-rs # 指定源
-#   .\sync.ps1 -Check                 # 只校验一致性，不写入（CI / 发版前用）
+#   .\sync.ps1 -UmaaiRoot <umaai-rs 目录>   # 指定源
+#   .\sync.ps1                             # 省略时读本仓 local_paths.json（不入库）
+#   .\sync.ps1 -Check                      # 只校验一致性，不写入（CI / 发版前用）
 param(
-    [string]$UmaaiRoot = 'f:\UmaAI_Active\umaai-rs',
+    [string]$UmaaiRoot = '',
     [switch]$Check
 )
 
 $ErrorActionPreference = 'Stop'
 $dst = $PSScriptRoot
+
+# 未显式指定时，回退读 local_paths.json（机器相关，不入版本控制）
+if (-not $UmaaiRoot) {
+    $lp = Join-Path $dst 'local_paths.json'
+    if (Test-Path $lp) {
+        $UmaaiRoot = (Get-Content $lp -Raw -Encoding UTF8 | ConvertFrom-Json).umaai_root
+    }
+}
+if (-not $UmaaiRoot) {
+    Write-Host '请用 -UmaaiRoot 指定 umaai-rs 目录，或先写 local_paths.json' -ForegroundColor Yellow
+    exit 1
+}
+Write-Host "源: $UmaaiRoot"
 
 $map = @(
     @{ Src = "$UmaaiRoot\.trae\skills\umaai_review\SKILL.md";   Dst = "$dst\SKILL.md" },
